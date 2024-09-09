@@ -3,6 +3,7 @@ import { User } from "../modals/user.modal";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import getDataUri from "../utils/datauri";
+import cloudinary from "../utils/cloudinary";
 
 interface UserType {
   _id: string;
@@ -38,7 +39,7 @@ export const register = async (req: Request, res: Response) => {
     await User.create({
       username,
       email,
-      password: hashedPassword, 
+      password: hashedPassword,
     });
 
     return res.status(201).json({
@@ -91,11 +92,9 @@ export const login = async (req: Request, res: Response) => {
       posts: user.posts,
     };
 
-    const token = jwt.sign(
-      { userId: user._id },
-      process.env.SECRET_KEY || "",
-      { expiresIn: "1d" }
-    );
+    const token = jwt.sign({ userId: user._id }, process.env.SECRET_KEY || "", {
+      expiresIn: "1d",
+    });
 
     return res
       .cookie("token", token, {
@@ -117,42 +116,72 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-export const logout = async(_,res: Response)=>{
-    try {
-        return res.cookie("token","",{maxAge:0}).json({
-            message:'Logged out successfully',
-            success:true
-        })
-    } catch (error) {
-        console.log(error)
-    }
-}
+export const logout = async (_, res: Response) => {
+  try {
+    return res.cookie("token", "", { maxAge: 0 }).json({
+      message: "Logged out successfully",
+      success: true,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
 
-export const getProfile = async(req: Request, res: Response)=>{
-    try {
-       const userId = req.params.id;
-       let user = await User.findById(userId)
-       return res.status(200).json({
-        user,
-        success:true
-       })
-    } catch (error) {
-        console.log(error)
-    }
-}
+export const getProfile = async (req: Request, res: Response) => {
+  try {
+    const userId = req.params.id;
+    let user = await User.findById(userId);
+    return res.status(200).json({
+      user,
+      success: true,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
 
-export const editProfile = async (req: any,res: Response)=>{
-    try {
-      const userId = req.id
-      const{bio,gender} = req.body
-      const profilePicture = req.file
-      let cloudResponse;
-      if(profilePicture){
-        const fileUri = getDataUri(profilePicture)
-        await 
+export const editProfile = async (req: any, res: Response) => {
+  try {
+    const userId = req.id; // Assuming you have userId stored in `req.id` from a middleware
+    const { bio, gender } = req.body;
+    const profilePicture = req.file;
+    let cloudResponse;
+
+    if (profilePicture) {
+      const fileUri = getDataUri(profilePicture);
+
+      if (fileUri) {
+        cloudResponse = await cloudinary.uploader.upload(fileUri);
+        console.log("Uploaded image response:", cloudResponse);
+      } else {
+        throw new Error("Invalid file URI");
       }
-        
-    } catch (error) {
-        
     }
-}
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+        success: false,
+      });
+    }
+
+    if (bio) user.bio = bio;
+    if (gender) user.gender = gender;
+    if (profilePicture) user.profilePicture = cloudResponse.secure_url;
+
+    await user.save();
+    return res.status(200).json({
+      message: "Profile Updated",
+      success: true,
+      user
+    });
+
+    res
+      .status(200)
+      .json({ success: true, message: "Profile updated successfully" });
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
