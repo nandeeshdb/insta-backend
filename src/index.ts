@@ -1,25 +1,24 @@
-import express, { Response } from "express";
-// import cors from "cors";
+import express, { Request, Response } from "express";
 import cookieParser from "cookie-parser";
+import dotenv from "dotenv"
+
+dotenv.config({});
 
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
-app.get('/', ( res: Response) => {
+// Corrected route handler with both req and res
+app.get('/', (req: Request, res: Response) => {
+    req
   return res.status(200).json({
     message: 'aaa',
     success: true
   });
 });
 
-// const corsOption = {
-//   origin: 'http://localhost:5173',
-//   credentials: true
-// };
-
-const PORT = 8000;
+const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
   console.log('Server running on port ' + PORT);
 });
