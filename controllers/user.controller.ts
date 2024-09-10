@@ -185,3 +185,22 @@ export const editProfile = async (req: any, res: Response) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
+export const getSuggestedUsers = async(req:any, res:Response)=>{
+  try {
+    const suggestedUsers = await User.find({_id:{$ne:req.id}}).select("-password")
+    if(!suggestedUsers){
+      return res.status(400).json({
+        message:"Currently do not have any user",
+        success:false
+      })
+    }
+
+    return res.status(200).json({
+      success:true,
+      users:suggestedUsers
+    })
+  } catch (error) {
+    console.log(error)
+  }
+}
