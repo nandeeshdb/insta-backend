@@ -78,7 +78,7 @@ export const login = async (req, res) => {
     const isPasswordMatch = await bcrypt.compare(password, user.password);
     if (!isPasswordMatch) {
       return res.status(401).json({
-        message: "Invalid credentials.",
+        message: "Incorrect Password!",
         success: false,
       });
     }
@@ -184,7 +184,7 @@ export const editProfile = async (req, res) => {
       }
     }
 
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).select('-password');
     if (!user) {
       return res.status(404).json({
         message: "User not found.",
@@ -217,10 +217,12 @@ export const editProfile = async (req, res) => {
 
 export const getSuggestedUsers = async (req, res) => {
   try {
-    const suggestedUsers = await User.find({ _id: { $ne: req.id } }).select(
-      "-password"
-    );
+    // Find all users except the current user, include "bookmark" and exclude "password"
+    const suggestedUsers = await User.find({ _id: { $ne: req.id } })
+      .select("-password");
 
+    console.log(suggestedUsers);
+    
     if (!suggestedUsers.length) {
       return res.status(404).json({
         message: "No users found.",
@@ -240,6 +242,7 @@ export const getSuggestedUsers = async (req, res) => {
     });
   }
 };
+
 
 export const followOrUnfollow = async (req, res) => {
   try {
