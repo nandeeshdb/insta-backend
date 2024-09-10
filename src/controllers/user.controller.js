@@ -1,23 +1,11 @@
-import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import getDataUri from "../utils/datauri";
-import cloudinary from "../utils/cloudinary";
-import { User } from "../modals/user.modal";
+import getDataUri from "../utils/datauri.js";
+import cloudinary from "../utils/cloudinary.js";
+import { User } from "../modals/user.modal.js";
 
-interface UserType {
-  _id: string;
-  username: string;
-  email: string;
-  password: string;
-  profilePicture?: string;
-  bio?: string;
-  followers?: string[];
-  following?: string[];
-  posts?: string[];
-}
 
-export const register = async (req: Request, res: Response) => {
+export const register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
@@ -61,7 +49,7 @@ export const register = async (req: Request, res: Response) => {
   }
 };
 
-export const login = async (req: Request, res: Response) => {
+export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -72,7 +60,7 @@ export const login = async (req: Request, res: Response) => {
       });
     }
 
-    const user: UserType | null = await User.findOne({ email });
+    const user= await User.findOne({ email });
     if (!user) {
       return res.status(404).json({
         message: "User not found.",
@@ -123,7 +111,7 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-export const logout = async (_: Request, res: Response) => {
+export const logout = async (_, res) => {
   try {
     return res
       .cookie("token", "", { maxAge: 0 })
@@ -137,7 +125,7 @@ export const logout = async (_: Request, res: Response) => {
   }
 };
 
-export const getProfile = async (req: Request, res: Response) => {
+export const getProfile = async (req, res) => {
   try {
     const userId = req.params.id;
     const user = await User.findById(userId).select("-password");
@@ -162,9 +150,9 @@ export const getProfile = async (req: Request, res: Response) => {
   }
 };
 
-export const editProfile = async (req: any, res: Response) => {
+export const editProfile = async (req, res) => {
   try {
-    const userId = req.id; // Assuming you have userId stored in `req.id` from a middleware
+    const userId = req.id; 
     const { bio, gender } = req.body;
     const profilePicture = req.file;
 
@@ -220,7 +208,7 @@ export const editProfile = async (req: any, res: Response) => {
 };
 
 
-export const getSuggestedUsers = async (req: any, res: Response) => {
+export const getSuggestedUsers = async (req, res) => {
   try {
     const suggestedUsers = await User.find({ _id: { $ne: req.id } }).select(
       "-password"
@@ -246,7 +234,7 @@ export const getSuggestedUsers = async (req: any, res: Response) => {
   }
 };
 
-export const followOrUnfollow = async (req: any, res: Response) => {
+export const followOrUnfollow = async (req, res) => {
   try {
     const userId = req.id;
     const targetUserId = req.params.id;

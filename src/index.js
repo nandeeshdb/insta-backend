@@ -1,6 +1,8 @@
-import express, { Request, Response } from "express";
+import express from "express";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv"
+import cors from "cors"
+import userRoutes from "./routes/user.route.js"
 
 dotenv.config({});
 
@@ -8,9 +10,16 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
+const corsOptions = {
+  origin:'http://localhost:5173',
+  credentials:true
+}
 
-// Corrected route handler with both req and res
-app.get('/', (req: Request, res: Response) => {
+app.use(cors(corsOptions))
+
+app.use("/api/v1/user",userRoutes)
+
+app.get('/', (req, res) => {
     req
   return res.status(200).json({
     message: 'aaa',

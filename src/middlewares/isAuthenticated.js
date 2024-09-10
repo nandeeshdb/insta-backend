@@ -1,7 +1,6 @@
-import { NextFunction, Request, Response } from "express";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
-const isAuthenticated = async (req: any, res: Response, next: NextFunction) => {
+const isAuthenticated = async (req, res, next) => {
   try {
     const token = req.cookies.token;
     if (!token) {
@@ -20,7 +19,7 @@ const isAuthenticated = async (req: any, res: Response, next: NextFunction) => {
       });
     }
 
-    req.id = (decode as JwtPayload).userId;
+    req.id = decode.userId;
     next();
   } catch (error) {
     return res.status(500).json({
