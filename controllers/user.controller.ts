@@ -204,3 +204,70 @@ export const getSuggestedUsers = async(req:any, res:Response)=>{
     console.log(error)
   }
 }
+
+export const followOrUnfollow = async(req:any,res:Response)=>{
+  try {
+    const myself = req.id;
+    const forFollowing = req.params.id;
+    if(myself === forFollowing){
+      return res.status(400).json({
+        message:"You can't follow/unfollow yourself",
+        success:false
+      })
+    }
+
+    const user = await User.findById(myself);
+    const targetUser = await User.findById(forFollowing);
+
+    if(!user || !targetUser){
+      return res.status(400).json({
+        message:"User not found",
+        success:false
+      })
+    }
+
+    //now checking if user is following or for unfollow
+    const isFollowing = user.following.includes(forFollowing);
+      if(isFollowing){
+          //unfollow logic 
+
+ await Promise.all([
+          User.updateOne({
+            _id:myself
+          },{
+            $pull:{following:forFollowing}
+          }),
+          User.updateOne({
+            _id:forFollowing
+          },{
+            $pull:{following:myself}
+          })
+        ])
+        return res.status(200).json({
+          message:"Unfollow successfully",
+          success:true
+        })
+      }else{
+        //follow logic
+        await Promise.all([
+          User.updateOne({
+            _id:myself
+          },{
+            $push:{following:forFollowing}
+          }),
+          User.updateOne({
+            _id:forFollowing
+          },{
+            $push:{following:myself}
+          })
+        ])
+        return res.status(200).json({
+          message:"Follow successfully",
+          success:true
+        })
+      }
+     
+  } catch (error) {
+    
+  }
+}
