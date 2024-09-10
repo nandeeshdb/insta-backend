@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv"
 import cors from "cors"
 import userRoutes from "./routes/user.route.js"
+import postRoutes from "./routes/post.route.js"
 import connectDB from "./utils/db.js"
 
 dotenv.config({});
@@ -19,14 +20,7 @@ const corsOptions = {
 app.use(cors(corsOptions))
 
 app.use("/api/v1/user",userRoutes)
-
-app.get('/', (req, res) => {
-    req
-  return res.status(200).json({
-    message: 'aaa',
-    success: true
-  });
-});
+app.use("api/v1/post",postRoutes)
 
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
