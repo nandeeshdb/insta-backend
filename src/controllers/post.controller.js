@@ -226,38 +226,37 @@ export const deletePost = async (req, res) => {
   } catch (error) {}
 };
 
-export const bookmarkPost = async (req,res)=> {
-    try {
-        const postId = req.params.id;
-        const authorId = req.id;
+export const bookmarkPost = async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const authorId = req.id;
 
-        const post = await Post.findById(postId);
-        if(!post) return res.status(404).json({
-            message: "Post not found!",
-            success: false,
-          });
-        
-        const user = await User.findById(authorId);
-        if(user.bookmarks.includes(post._id)) {
-            //already bookmarked -> remove from the bookmark
-            await user.updateOne({$pull:{bookmarks:post._id}})
-            await user.save()
-            return res.status(200).json({
-                message: "Post removed from bookmark",
-                success: true,
-                type:"unsaved"
-              })
-        }else{
-             //not bookmarked -> add to the bookmark
-             await user.updateOne({$addToSet:{bookmarks:post._id}})
-             await user.save()
-             return res.status(200).json({
-                 message: "Post added to bookmark",
-                 success: true,
-                 type:"saved"
-               })
-        }
-    } catch (error) {
-        
+    const post = await Post.findById(postId);
+    if (!post)
+      return res.status(404).json({
+        message: "Post not found!",
+        success: false,
+      });
+
+    const user = await User.findById(authorId);
+    if (user.bookmarks.includes(post._id)) {
+      //already bookmarked -> remove from the bookmark
+      await user.updateOne({ $pull: { bookmarks: post._id } });
+      await user.save();
+      return res.status(200).json({
+        message: "Post removed from bookmark",
+        success: true,
+        type: "unsaved",
+      });
+    } else {
+      //not bookmarked -> add to the bookmark
+      await user.updateOne({ $addToSet: { bookmarks: post._id } });
+      await user.save();
+      return res.status(200).json({
+        message: "Post added to bookmark",
+        success: true,
+        type: "saved",
+      });
     }
-}
+  } catch (error) {}
+};
