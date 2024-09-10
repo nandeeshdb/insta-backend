@@ -16,10 +16,17 @@ export const register = async (req, res) => {
       });
     }
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
+    const existingUser1 = await User.findOne({ email });
+    if (existingUser1) {
       return res.status(400).json({
         message: "Email already in use.",
+        success: false,
+      });
+    }
+    const existingUser2 = await User.findOne({ username });
+    if (existingUser2) {
+      return res.status(400).json({
+        message: "Please choose different username",
         success: false,
       });
     }
