@@ -20,7 +20,7 @@ const corsOptions = {
 app.use(cors(corsOptions))
 
 app.use("/api/v1/user",userRoutes)
-app.use("api/v1/post",postRoutes)
+app.use("/api/v1/post",postRoutes)
 
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {

@@ -62,8 +62,13 @@ export const getAllPost = async (req, res) => {
         })
     } catch (error) {
         console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: 'Something went wrong'
+        });
     }
 };
+
 export const getUserPost = async (req, res) => {
     try {
         const authorId = req.id;
@@ -150,6 +155,7 @@ export const addComment = async (req,res) =>{
         const {text} = req.body;
 
         const post = await Post.findById(postId);
+        if(!post) return res.status(404).json({message:"Post not found!",success:false})
 
         if(!text) return res.status(400).json({message:'text is required', success:false});
 
